@@ -113,7 +113,7 @@ Class Tetris{
 		
 		if(!this.Init){
 			Gui,Margin,0,0
-			Gui,+hwndMain -Caption
+			Gui,+hwndMain -Caption -DPIScale
 			def:=this.FixIE(11)
 			Gui,Add,ActiveX,% "w500 h" this.BoardHeight+this.y+8 " vwb hwndIE",mshtml
 			this.Init:=1,this.FixIE(def),this.IEHWND:=IE,this.Main:=Main
