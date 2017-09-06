@@ -482,7 +482,7 @@ m(x*){
 	ControlGetFocus,Focus,A
 	ControlGet,hwnd,hwnd,,%Focus%,ahk_id%active%
 	static list:={btn:{oc:1,ari:2,ync:3,yn:4,rc:5,ctc:6},ico:{"x":16,"?":32,"!":48,"i":64}},msg:=[],msgbox
-	list.title:="AHK Studio",list.def:=0,list.time:=0,value:=0,msgbox:=1,txt:=""
+	list.title:="Tetris",list.def:=0,list.time:=0,value:=0,msgbox:=1,txt:=""
 	for a,b in x
 		obj:=StrSplit(b,":"),(vv:=List[obj.1,obj.2])?(value+=vv):(list[obj.1]!="")?(List[obj.1]:=obj.2):txt.=b "`n"
 	msg:={option:value+262144+(list.def?(list.def-1)*256:0),title:list.title,time:list.time,txt:txt}
@@ -599,7 +599,8 @@ Run(Tet:=""){
 	if(All){
 		if(Count=1){
 			FileDelete,Board.xml
-			Reload
+			if(m("Final Score: " Tetris.Score,"Lines: " Tetris.Lines,"btn:ync")="Yes")
+				Reload
 			ExitApp
 		}return RegisterTetrimino(Tetrimino),Tetris.Swapped:=0,Count:=0,Tetrimino:=Tetris.PullQueue(),EvalGhost(1)
 	}
