@@ -1,1 +1,1 @@
-# Tetris<br>##Uploaded using AHK Studio
+# Tetris<br>*Movement Keys<br> *Left-Left<br> *Right-Right<br> *Down-Drop Quickly<br> *S-Drop To Bottom
