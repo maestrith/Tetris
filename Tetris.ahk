@@ -1,5 +1,5 @@
 #SingleInstance,Force
-global wb,Settings:=new XML("Settings")
+global wb,Settings:=new XML("Settings"),Close:="}"
 SetBatchLines,-1
 Defaults()
 Tetris:=new Tetris(),Tetris.Settings(),Tetris.Size:=20
@@ -9,6 +9,9 @@ if(Tetris.XML.SSN("//hold"),Current:=Tetris.XML.EA("//current")){
 	Run(Tetris.Tetrimino(Current.Piece,Current.Orientation,0,Current.Color)),Tetris.Score:=Tetris.XML.SSN("//score").text,Tetris.Lines:=Tetris.XML.SSN("//lines").text,Tetris.SetScore()
 }else
 	Run(Tetris.Tetrimino(Shape,Orientation))
+/*
+	m(Tetris.IE.Document.Body.OuterHtml)
+*/
 Tetris.FillQueue(Tetris.XML.SN("//queue"))
 /*
 	Random()
@@ -108,16 +111,14 @@ Class Tetris{
 		S:=[[[0,1],[1,1],[1,2],[2,2]],[[1,0],[1,1],[0,1],[0,2]],[[0,1],[1,1],[1,2],[2,2]],[[1,0],[1,1],[0,1],[0,2]]]
 		O:=[[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[1,0],[1,1]]]
 		this.Tetriminos:={1:I,2:T,3:L,4:M,5:Z,6:S,7:O},this.QueueCount:=4,this.Score:=0,this.Lines:=0,this.Board:=[]
-		
 		this.AllDots:=[]
-		
 		if(!this.Init){
 			Gui,Margin,0,0
 			Gui,+hwndMain -Caption -DPIScale
 			def:=this.FixIE(11)
 			Gui,Add,ActiveX,% "w500 h" this.BoardHeight+this.y+8 " vwb hwndIE",mshtml
 			this.Init:=1,this.FixIE(def),this.IEHWND:=IE,this.Main:=Main
-		}wb.Navigate("about:<html><script>onerror=function(event){return true;};onmessage=function(event){return false;};onclick=function(event){ahk_event('OnClick',event);};onchange=function(event){ahk_event('OnChange',event);};oninput=function(event){ahk_event('OnInput',event);};onprogresschange=function(event){ahk_event('OnProgressChange',event);};</script><body style='background-color:Black;margin:0px;'><div id='Settings' Style='Visibility:Hidden'></div><svg></svg></body></html>")
+		}wb.Navigate("about:<html><script>onerror=function(event){return true;"(Close)";onmessage=function(event){return false;"(Close)";onclick=function(event){ahk_event('OnClick',event);"(Close)";onchange=function(event){ahk_event('OnChange',event);"(Close)";oninput=function(event){ahk_event('OnInput',event);"(Close)";onprogresschange=function(event){ahk_event('OnProgressChange',event);"(Close)";</script><body style='background-color:Black;margin:0px;'><div id='Settings' Style='Visibility:Hidden'></div><svg></svg></body></html>")
 		while(wb.ReadyState!=4)
 			Sleep,10
 		this.Main:=Main,this.IE:=wb,this.IE.Document.ParentWindow.ahk_event:=Tetris._Event.Bind(Tetris),this.Doc:=this.IE.Document,this.svg:=wb.Document.GetElementsByTagName("svg").item[0]
@@ -160,6 +161,7 @@ Class Tetris{
 		Node:=Event.srcElement
 		m(Node.OuterHtml)
 	}CreateElementNS(Parent,x,y,w,h,Stroke:="blue",Fill:="",Type:="rect"){
+		
 		Parent.AppendChild(Item:=wb.Document.CreateElementNS("http://www.w3.org/2000/svg",Type))
 		for a,b in {x:x,y:y,width:w,height:h,stroke:Stroke,fill:Fill}
 			if(b!="")
@@ -269,7 +271,7 @@ Class Tetris{
 		else
 			Obj:=Hold="Hold"?this.Hold:=[]:Obj:=[],Obj.For:=[]
 		if(!Color)
-			Random,Color,222222,999999
+			Color:=RandomColor()
 		Loop,4
 			rect:=this.CreateElementNS(this.svg,0,Size*-4,Size,Size,"black","#" Color),rect.SetAttribute("visibility",(Hold?"visible":"hidden")),Obj.For.Push({x:0,y:0,obj:rect,visibility:(Hold?1:0),color:Color})
 		Obj.Position:={x:(Hold?0:Floor(this.BoardWidth/2)),y:0},Obj.Piece:=Piece,Obj.Orientation:=Orientation,this.DrawTetrimino(Obj,Hold?0:1,Hold),obj.Color:=Color
@@ -500,7 +502,7 @@ m(x*){
 Random(){
 	Size:=Tetris.Size,CountW:=Floor(Tetris.BoardWidth/Size)+1,StartY:=200,Tetris.CurrentTetrimino:=[],Tetris.CurrentTetrimino.For:=[]
 	While(StartY<Tetris.BoardHeight){
-		Random,Color,222222,999999
+		Color:=RandomColor()
 		StartX:=0
 		While(Mod(A_Index,CountW)){
 			if(StartX=120){
@@ -642,4 +644,12 @@ EvalGhost(Color:=0){
 		for a,b in Ghost.For
 			b.Obj.SetAttribute("fill",Tetrimino.Color),b.Obj.SetAttribute("fill-opacity",.2)
 	Ghost.Max:=Max
+}
+RandomColor(){
+	Random, Index, 0, 240
+	return ColorHLSToRGB(Index,120,240)
+}
+ColorHLSToRGB(Hue,Luminance,Saturation) { ; Reference: https://docs.microsoft.com/en-us/windows/win32/api/shlwapi/nf-shlwapi-colorhlstorgb - ColorHLSToRGB function
+	BGR:=DllCall("shlwapi.dll\ColorHLSToRGB","UShort",Hue,"UShort",Luminance,"UShort",Saturation,"UInt")
+	Return Format("{:06X}",((BGR&0xFF)<<16)|(BGR&0xFF00)|((BGR>>16)&0xFF))
 }

@@ -1,5 +1,3 @@
-0.000.2
-Added: Suggested by SKAN
--Final Score MsgBox
-0.000.1
-Initial Post
+0.000.3
+Changed: Suggested by iPhilip
+-ColorHLSToRGB: This is used to get colors that work well against a black background
